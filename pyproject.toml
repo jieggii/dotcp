@@ -1,7 +1,7 @@
 [project]
 name = "dotcp"
-version = "0.1.0"
-description = "copy your selected dotfiles to directory"
+version = "0.1.1"
+description = "copy selected dotfiles to directory"
 authors = [
     {name = "jieggii", email = "jieggii.contact@gmail.com"},
 ]

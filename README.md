@@ -1,5 +1,5 @@
 # dotcp
-Copy your selected dotfiles to directory
+Copy selected dotfiles to directory
 
 ## What is it?
 As said, **dotcp** copies your _selected_ dotfiles to directory you indicated.

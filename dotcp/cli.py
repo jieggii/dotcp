@@ -1,7 +1,6 @@
 from argparse import ArgumentParser, RawTextHelpFormatter
 from pathlib import PosixPath
 from sys import stderr, stdout
-from typing import TextIO
 
 from dotcp import __version__
 
@@ -9,7 +8,7 @@ from dotcp import __version__
 def get_args_parser():
     parser = ArgumentParser(
         prog="dotcp",
-        description="copy your dotfiles to directory",
+        description="copy selected dotfiles to directory",
         formatter_class=RawTextHelpFormatter,
     )
     parser.add_argument(
@@ -30,7 +29,7 @@ def get_args_parser():
         help="append dotfiles to destination directory",
     )
     parser.add_argument(
-        "--config", "-c", type=PosixPath, help="path to dot's config file"
+        "--config", "-c", type=PosixPath, help="path to dotcp's config file"
     )
     parser.add_argument(
         "--config-home",
