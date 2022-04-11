@@ -20,7 +20,7 @@ Just wanted to have something similar to [this script](https://github.com/jieggi
 ## Installation
 **dotcp** can be easily installed via **pip** (as any other shitty python program):
 
-`pip install --user dotcp`.
+`pip install --user dotcp`
 
 ## Usage
 At first just run **dotcp** without any flags, indicating destination directory that does not yet exist:
