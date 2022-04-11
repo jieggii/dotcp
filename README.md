@@ -19,6 +19,7 @@ Just wanted to have something similar to [this script](https://github.com/jieggi
 
 ## Installation
 **dotcp** can be easily installed via **pip** (as any other shitty python program):
+
 `pip install --user dotcp`.
 
 ## Usage
