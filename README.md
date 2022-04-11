@@ -2,7 +2,7 @@
 Copy selected dotfiles to directory
 
 ## What is it?
-As said, **dotcp** copies your _selected_ dotfiles to directory you indicated.
+As said, **dotcp** copies _selected_ dotfiles to directory you indicated.
 For example, `dotcp ~/awesome-dotifles/config/` will copy your selected dotfiles into `~/awesome-dotfiles/config/`.
 How to _select_ dotfiles, you would ask? **dotcp** has it's own config. E.g:
 ```
