@@ -24,7 +24,8 @@ Just wanted to have something similar to [this script](https://github.com/jieggi
 
 ## Usage
 At first just run **dotcp** without any flags, indicating destination directory that does not yet exist (e.g. `destination-dir`):
-`dotcp destination-dir/`.
+
+`dotcp destination-dir/`
 
 Then you will have to use one of these flags: `--overwrite` or `--append` to update content of destination directory.
 * `--overwrite` does the same thing as `rm -r destination-dir && dotcp destination-dir`
