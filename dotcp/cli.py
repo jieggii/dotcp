@@ -1,53 +1,25 @@
-from argparse import ArgumentParser, RawTextHelpFormatter
+from argparse import ArgumentParser, RawTextHelpFormatter, HelpFormatter
 from pathlib import PosixPath
-from sys import stderr, stdout
 
-from dotcp import __version__
+from . import __version__
 
 
-def get_args_parser():
+def get_args_parser() -> ArgumentParser:
     parser = ArgumentParser(
         prog="dotcp",
         description="copy selected dotfiles to directory",
-        formatter_class=RawTextHelpFormatter,
+        epilog="epilog"
     )
     parser.add_argument(
-        "destination",
+        "dest",
         type=PosixPath,
-        help="directory where dotfiles will be put",
+        help="destination directory (where targets will be put)",
     )
     parser.add_argument(
-        "--overwrite",
-        "-w",
+        "--remove-outdated",
         action="store_true",
-        help="empty directory before copying dotfiles",
+        help="remove copies of targets, that are not listed in the config file anymore"
     )
-    parser.add_argument(
-        "--append",
-        "-a",
-        action="store_true",
-        help="append dotfiles to destination directory",
-    )
-    parser.add_argument(
-        "--config", "-c", type=PosixPath, help="path to dotcp's config file"
-    )
-    parser.add_argument(
-        "--config-home",
-        "-ch",
-        type=PosixPath,
-        help="path to your config home directory (e.g. ~/.config)",
-    )
-    parser.add_argument(
-        "--version", action="version", version=f"%(prog)s {__version__}"
-    )
-
+    parser.add_argument("--config", "-c", type=PosixPath, help="path to dotcp config file")
+    parser.add_argument("--version", action="version", version=f"%(prog)s {__version__}")
     return parser
-
-
-def info(message: str):
-    stdout.write(f"{message}\n")
-
-
-def fatal(message: str):
-    stderr.write(f"Fatal error: {message}\n")
-    exit(-1)

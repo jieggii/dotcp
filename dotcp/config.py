@@ -1,62 +1,77 @@
 import os
+import sys
 from getpass import getuser
 from pathlib import PosixPath
-from typing import List, Optional
+from typing import List, NoReturn, Optional, Union, Generator, Iterable
 
-_XDG_CONFIG_HOME = os.getenv("XDG_CONFIG_HOME")
+from . import log
 
-_CONFIG_HOME_PATHS: List[PosixPath] = (
-    [PosixPath(_XDG_CONFIG_HOME)] if _XDG_CONFIG_HOME else []
-)
-_CONFIG_HOME_PATHS.extend(
-    [
-        PosixPath(PosixPath.home().joinpath(".config")),
-        PosixPath(f"/home/{getuser()}/.config"),
+
+def detect_config_home() -> Optional[PosixPath]:
+    for path in [
+        PosixPath(os.getenv("XDG_CONFIG_HOME")),
+        PosixPath("~/.config"),
         PosixPath("~/.config").expanduser(),
-    ]
-)
+        PosixPath(f"/home/{getuser()}/.config"),
+        PosixPath(PosixPath.home().joinpath(".config")),
+    ]:
+        if path.exists():
+            return path
+    return None
 
 
 class Config:
-    def __init__(
-        self,
-        overwrite_config_path: Optional[PosixPath] = None,
-        overwrite_config_home_path: Optional[PosixPath] = None,
-    ):
-        if overwrite_config_home_path:
-            self.config_home = overwrite_config_home_path.expanduser()
-            if not self.config_home.exists():
-                raise ValueError(
-                    f"provided config home ({overwrite_config_home_path}) does not exist"
+    path: PosixPath
+    content: str
+
+    def __init__(self, *, path: Optional[PosixPath]):
+        if path:
+            self.path = path
+        else:
+            config_home = detect_config_home()
+            if not config_home:
+                log.error(
+                    "could not detect config home. Please set config file path manually "
+                    "(using --config parameter)",
+                    terminate=True,
                 )
-        else:
-            self.config_home = self.find_config_home()
-
-        if overwrite_config_path:
-            self.path = overwrite_config_path.expanduser()
-        else:
-            self.path = self.config_home.joinpath("dotcp", "config")
+            self.path = config_home.joinpath("dotcp", "config")
         if not self.path.exists():
-            raise ValueError(f"dotcp's config ({self.path}) does not exist")
+            log.error(f"dotcp config file ({self.path}) does not exist", terminate=True)
+        self.content = self._read()
 
-    def find_config_home(self):
-        for path in _CONFIG_HOME_PATHS:
-            if path.exists():
-                return path
-        raise RuntimeError(
-            "could not detect config home path. Please provide it manually using `--config-home` option or setting $XDG_CONFIG_HOME enviroment variable"
-        )
+    def _read(self) -> Union[str, NoReturn]:
+        try:
+            with open(self.path, "r", encoding="utf=8") as file:
+                return file.read()
+        except FileNotFoundError:
+            log.error(f"could not open dotcp config file ({self.path}) - file not found", terminate=True)
+        except PermissionError:
+            log.error(
+                f"could not open dotcp config file ({self.path}) - permission denied", terminate=True
+            )
+        except Exception as err:
+            log.error(
+                f"could not open dotcp config file ({self.path}) - unknown error: {str(err)}",
+                terminate=True,
+            )
 
-    def get_targets(self):
-        targets = []
-        with open(self.path, encoding="utf-8") as file:
-            lines = file.readlines()
-            for line in lines:
-                line = line.strip()
-                target = PosixPath(self.config_home.joinpath(line))
-                if not target.exists():
-                    raise RuntimeError(
-                        f"target {target} provided in the config does not exist"
-                    )
-                targets.append(target)
-        return targets
+    def get_targets(self) -> Union[List[PosixPath], NoReturn]:
+        terminate = False
+        lines = self.content.splitlines()
+        for i, line in enumerate(lines):
+            line_number = i + 1
+            line = line.strip()
+            if not line:
+                continue
+            if line.startswith("#"):
+                continue
+            target = PosixPath(line)
+            if target.expanduser().exists():
+                yield target
+            else:
+                terminate = True
+                log.error(f"target {target} indicated in ({self.path}:{line_number}) does not exist")
+        if terminate:
+            log.echo("Terminating due to errors above.")
+            sys.exit(-1)
